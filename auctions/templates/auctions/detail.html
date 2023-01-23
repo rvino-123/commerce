@@ -1,0 +1,43 @@
+{% extends "auctions/layout.html" %} 
+
+{% block body %}
+
+<h1>{{ listing.title }}</h1>
+<h3>{{ listing.user_id.username }}</h3>
+<ul>
+  {% if highest_bid %}
+  <li>Current highest bid: ${{ highest_bid.price }}</li>
+  {% else %}
+  <li>Current highest bid: ${{ listing.starting_bid }}</li>
+  {% endif %}
+  <li>
+    <form method="POST" action="{% url 'create_bid' listing.id %}">
+      {% csrf_token %}
+      <div class="form-control">
+        <label class="form-label">Bid</label>
+        <input type="number" name="price">
+      </div>
+    </form>
+  </li>
+  <li>Comments:</li>
+  <ul>
+    {% for c in comments %}
+    <li>{{ c.description}} - {{ c.user_id.username}}</li>
+    {% endfor %}
+    {% if user.is_authenticated %}
+    <li>
+      <form method="post" action="{% url 'insert_comment' listing.id %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="description" class="form-label">Comment here</label>
+          <input name="description" class="form-control"/>
+          <button class="btn btn-success">Submit</button>
+        </div>
+      </form>
+
+    </li>
+    {% endif %}
+  </ul>
+</ul>
+
+{% endblock %}
