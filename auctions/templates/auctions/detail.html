@@ -19,6 +19,20 @@
       </div>
     </form>
   </li>
+  <li>
+    {% if user.is_authenticated %}
+    <div class="btn-group" role="group" aria-label="...">
+      <form method="post" action="{% url 'add_remove_watchlist' listing.id %}">
+        {% csrf_token %}
+        {% if watching %}
+        <button type="submit" class="btn btn-danger">Unwatch</button>
+        {% else %}
+        <button type="submit" class="btn btn-info">Watch</button>
+        {% endif %}
+      </form>
+    </div>
+  {% endif %}
+  </li>
   <li>Comments:</li>
   <ul>
     {% for c in comments %}

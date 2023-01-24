@@ -15,6 +15,32 @@ def index(request):
     })
 
 
+# GET auctions/watchlist (login protected)
+def watchlist(request):
+    listings = request.user.listings.all()
+    watching = len(listings)
+    return render(request, "auctions/watchlist.html", {
+        "listings": listings,
+        "watching": watching
+    })
+
+
+# POST auctions/<listing_id>/watchlist
+# not happy with this view but may need javascript to help
+@login_required
+def add_remove_watchlist(request, id):
+    user = request.user
+    listing = Listing.objects.get(id=id)
+    watching = True if listing in user.listings.all() else False
+    if watching:
+        user.listings.remove(listing)
+    else:
+        user.listings.add(listing)
+    user.save()
+    return redirect(reverse('detail', args=[id]))
+    # return redirect(request.META['HTTP_REFERER'])
+
+
 def listing_detail(request, id):
     listing = Listing.objects.filter(id=id)[0]
     if not listing:
@@ -22,13 +48,18 @@ def listing_detail(request, id):
 
     highest_bid = listing.get_highest_bid()
     comments = listing.comment_set.all()
-
+    if request.user.id:
+        watching = True if listing in request.user.listings.all() else False
+    else:
+        watching = False
 
     return render(request, "auctions/detail.html", {
         "listing": listing,
         "comments": comments,
-        "highest_bid": highest_bid
+        "highest_bid": highest_bid, 
+        "watching": watching
     })
+
 
 @login_required
 def create(request):

@@ -3,7 +3,8 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    def get_watchlist_count(self):
+        return len(self.listings.all())
 
 
 class Category(models.Model):
@@ -15,9 +16,10 @@ class Listing(models.Model):
     description = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     starting_bid = models.FloatField()
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
     image = models.ImageField()
+    watchers = models.ManyToManyField(User, related_name="listings")
 
     def get_highest_bid(self):
        if len(self.bid_set.all()) > 0:
