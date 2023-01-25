@@ -5,6 +5,7 @@
 
 <ul>
   {% for listing in listings %}
+  <!-- listing should be active TODO -->
   <a href="{% url 'detail' listing.id%}">
     <li>{{listing.title}}</li>
   </a>

@@ -20,6 +20,7 @@ class Listing(models.Model):
     active = models.BooleanField(default=True)
     image = models.ImageField()
     watchers = models.ManyToManyField(User, related_name="listings")
+    winner = models.ForeignKey(User, related_name="bids_won", null=True, on_delete=models.SET_NULL)
 
     def get_highest_bid(self):
        if len(self.bid_set.all()) > 0:
