@@ -3,13 +3,20 @@
 {% block body %}
 
 <h1>{{ listing.title }}</h1>
-<h3>{{ listing.user_id.username }}</h3>
+<h3>{{ listing.owner.username }}</h3>
+<!-- IF winner, display winner and closing price -->
+{% if listing.winner %}
+<h4>Won by {{ listing.winner.username }} for {{ highest_bid.price }}</h4>
+{% endif %}
+<!-- TODO -->
+<!-- Else -->
 <ul>
-  {% if highest_bid %}
+  {% if highest_bid%}
   <li>Current highest bid: ${{ highest_bid.price }}</li>
-  {% else %}
-  <li>Current highest bid: ${{ listing.starting_bid }}</li>
+  {% else%}
+  <li>Starting bids at: ${{ listing.starting_bid }}</li>
   {% endif %}
+  {% if user.is_authenticated and user != listing.owner and listing.active%}
   <li>
     <form method="POST" action="{% url 'create_bid' listing.id %}">
       {% csrf_token %}
@@ -19,11 +26,18 @@
       </div>
     </form>
   </li>
+  {% endif %}
+  <!-- {% if user.is_authenticated %} -->
+  {% if user.is_authenticated and  is_owner and listing.active %}
   <li>
-    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'close_auction' listing.id %}">
+      {% csrf_token %}
+      <button class="btn btn-danger">Close Auction</button>
+    </form>
+    {% elif listing.active %}
     <div class="btn-group" role="group" aria-label="...">
       <form method="post" action="{% url 'add_remove_watchlist' listing.id %}">
-        {% csrf_token %}
+        {% csrf_token %}    
         {% if watching %}
         <button type="submit" class="btn btn-danger">Unwatch</button>
         {% else %}
@@ -31,6 +45,7 @@
         {% endif %}
       </form>
     </div>
+    {% endif %}
   {% endif %}
   </li>
   <li>Comments:</li>
@@ -38,7 +53,8 @@
     {% for c in comments %}
     <li>{{ c.description}} - {{ c.user_id.username}}</li>
     {% endfor %}
-    {% if user.is_authenticated %}
+    <!-- User should be authenticated and listing should be active -->
+    {% if user.is_authenticated and listing.active %}
     <li>
       <form method="post" action="{% url 'insert_comment' listing.id %}">
         {% csrf_token %}

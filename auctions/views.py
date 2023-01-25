@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -40,24 +40,31 @@ def add_remove_watchlist(request, id):
     return redirect(reverse('detail', args=[id]))
     # return redirect(request.META['HTTP_REFERER'])
 
-
+# TODO
 def listing_detail(request, id):
     listing = Listing.objects.filter(id=id)[0]
     if not listing:
         raise Http404()
-
     highest_bid = listing.get_highest_bid()
     comments = listing.comment_set.all()
+    # Watchlist
     if request.user.id:
         watching = True if listing in request.user.listings.all() else False
     else:
         watching = False
+    is_owner = False
+    # Owner
+    
+    if request.user == listing.owner:
+        is_owner = True
+
 
     return render(request, "auctions/detail.html", {
         "listing": listing,
         "comments": comments,
         "highest_bid": highest_bid, 
-        "watching": watching
+        "watching": watching,
+        "is_owner": is_owner
     })
 
 
@@ -72,7 +79,7 @@ def create(request):
                             description=data.get("description"),
                             category = data.get("category"),
                             starting_bid = data.get("starting_bid"),
-                            user_id = user
+                            owner = user
                         )
         listing.save()
         return redirect("/")
@@ -80,6 +87,31 @@ def create(request):
     return render(request, "auctions/create.html", {
         "categories": categories
     })
+
+# Close Auction
+# POST /auctions/<id>/close
+# To think about, what if a bid is placed while this request has been set? 
+# TODO
+@login_required
+def close_auction(request, id):
+    # get the listing
+    listing = Listing.objects.get(id=id)
+    if not listing:
+        return Http404("Listing not found. ")
+    # only owner of listing can close the auction
+    if request.user != listing.owner:
+        return HttpResponseNotAllowed("Only owner of the bid can close it. ")
+    # get the user of the highest bid
+    winner = listing.get_highest_bid().user
+    if winner:
+        listing.winner = winner
+    
+    # set 'active' property of listing to false
+    listing.active = False
+    listing.save()
+    # redirect to detail page
+    return redirect(reverse("detail", args=[id]))
+
 
 # Bids
 # POST /auction/<id>/bids
@@ -91,17 +123,18 @@ def create_bid(request, id):
         # Get user from request
         user = User.objects.get(id=request.user.id)
         # get auction from form data
-        auction = Listing.objects.get(id=id)
+        listing = Listing.objects.get(id=id)
+        if listing.owner == user:
+            return HttpResponseBadRequest("Owner of listing cannot create a bid for it.")
         # instantiate bid and save
-        print(data["price"])
-        bid = Bid(price=data["price"], user=user, listing=auction)
-        print(bid)
+        bid = Bid(price=data["price"], user=user, listing=listing)
         try:
             bid.save()
         except Exception as e:
             print(e)
         finally:
             return redirect(reverse("detail", args=[id]))
+
 
 # POST /auction/<id>/comments
 def insert_comment(request, id):
@@ -113,6 +146,7 @@ def insert_comment(request, id):
             description=data.get("description"))
         comment.save()
         return redirect(reverse("detail", args=[id]))
+
 
 def login_view(request):
     if request.method == "POST":
