@@ -3,7 +3,6 @@ import environ
 from pathlib import Path
 
 env = environ.Env(DEBUG=(bool, False))
-import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 environ.Env.read_env(BASE_DIR / ".env")
@@ -26,7 +25,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = ["rest_framework", "djoser"]
 
-LOCAL_APPS = ["apps.auctions", "apps.common", "apps.users"]
+LOCAL_APPS = ["apps.common", "apps.users"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -104,11 +103,18 @@ SIMPLE_JWT = {
 DJOSER = {
     "LOGIN_FIELD": "email",
     "USER_CREATE_PASSWORD_RETYPE": True,
-    # "SEND_CONFIRMATION_EMAIL": True,
+    "SEND_CONFIRMATION_EMAIL": True,
     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
-    "PASSWORD_RESET_CONFIRM_URL": "/passwords/reset/{uid}/{token}",
+    "PASSWORD_RESET_CONFIRM_URL": "passwords/reset/{uid}/{token}",
     "SET_PASSWORD_RETYPE": True,
     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
     "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
     "ACTIVATION_URL": "activate/{uid}/{token}",
+    "SEND_ACTIVATION_EMAIL": True,
+    "SERIALIZERS": {
+        "users_create": "apps.users.serializers.CreateUserSerializer",
+        "users": "apps.users.serializers.UserSerializer",
+        "current_user": "apps.users.serializers.UserSerializer",
+        "user_delete": "djoser.serializers.UserDeleteSerializer",
+    },
 }
