@@ -1,5 +1,10 @@
 # CS50WEB WEEK 3 PROJECT: COMMERCE
 
+# User Profile
+## About
+The User profile is created when the user signs up. It will populate the user's "profile page" that will contain stats like items on sale, items sold, money paid in last x months. Other users can see the profile, but they will see "public" information such as username, items on sale etc.. 
+
+
 
 # Testing
 
