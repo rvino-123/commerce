@@ -25,7 +25,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = ["rest_framework", "djoser"]
 
-LOCAL_APPS = ["apps.common", "apps.users", "apps.profiles"]
+LOCAL_APPS = ["apps.common", "apps.users", "apps.profiles", "apps.addresses"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
