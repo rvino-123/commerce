@@ -23,11 +23,16 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = ["rest_framework", "djoser"]
+THIRD_PARTY_APPS = [
+    "rest_framework",
+    "djoser",
+    "daphne",
+    "channels",
+]
 
 LOCAL_APPS = ["apps.common", "apps.users", "apps.profiles", "apps.addresses"]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -119,3 +124,5 @@ DJOSER = {
         "user_delete": "djoser.serializers.UserDeleteSerializer",
     },
 }
+
+ASGI_APPLICATION = "commerce.asgi.application"
